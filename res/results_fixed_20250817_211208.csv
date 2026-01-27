@@ -1,0 +1,7 @@
+File,Result,Variables,Clauses,Time(seconds),Memory(kB)
+cnf/bcspwr01.mtx.rnd_n39_k29/bcspwr01.mtx.rnd_n39_k29_w2.cnf,N/A,3421,12503,10.03,0
+cnf/bcspwr01.mtx.rnd_n39_k29/bcspwr01.mtx.rnd_n39_k29_w3.cnf,N/A,3382,13672,10.02,0
+cnf/bcspwr01.mtx.rnd_n39_k29/bcspwr01.mtx.rnd_n39_k29_w4.cnf,N/A,3460,14154,10.01,0
+cnf/494_bus.mtx.rnd_n494_k370/494_bus.mtx.rnd_n494_k370_w2.cnf,N/A,501750,1905922,12.81,0
+cnf/494_bus.mtx.rnd_n494_k370/494_bus.mtx.rnd_n494_k370_w3.cnf,N/A,528426,2185474,10.03,0
+cnf/494_bus.mtx.rnd_n494_k370/494_bus.mtx.rnd_n494_k370_w4.cnf,N/A,541270,2322596,10.04,0
