@@ -1,0 +1,11 @@
+File,Result,Variables,Clauses,Time(seconds),Memory(kB)
+cnf/ibm32.mtx.rnd_n32_k16/ibm32.mtx.rnd_n32_k16_w2.cnf,UNSATISFIABLE,1554,7241,0.04,45472
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w2.cnf,SATISFIABLE,3202,15113,0.04,49728
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w3.cnf,SATISFIABLE,3234,17045,0.04,50848
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w4.cnf,SATISFIABLE,3202,17321,0.04,50848
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w5.cnf,SATISFIABLE,3234,17789,0.04,50848
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w6.cnf,SATISFIABLE,3202,17731,0.04,51072
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w7.cnf,SATISFIABLE,3138,17417,0.04,50848
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w8.cnf,SATISFIABLE,2978,16577,0.04,50412
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w9.cnf,SATISFIABLE,3042,16743,0.09,56768
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w10.cnf,UNSATISFIABLE,3106,16639,0.04,51744

@@ -1,0 +1,3 @@
+File,Result,Variables,Clauses,Time(seconds),Memory(kB)
+cnf/ibm32.mtx.rnd_n32_k32/ibm32.mtx.rnd_n32_k32_w10.cnf,UNSATISFIABLE,3106,16639,0.05,51476
+cnf/ibm32.mtx.rnd_n32_k16/ibm32.mtx.rnd_n32_k16_w10.cnf,UNSATISFIABLE,1266,5707,0.03,44564

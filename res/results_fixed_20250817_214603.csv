@@ -1,0 +1,8 @@
+File,Result,Variables,Clauses,Time(seconds),Memory(kB)
+cnf/ibm32.mtx.rnd_n32_k25/ibm32.mtx.rnd_n32_k25_w2.cnf,SATISFIABLE,2146,9602,0.06,76608
+cnf/ibm32.mtx.rnd_n32_k25/ibm32.mtx.rnd_n32_k25_w3.cnf,SATISFIABLE,2146,10834,0.05,77056
+cnf/ibm32.mtx.rnd_n32_k25/ibm32.mtx.rnd_n32_k25_w4.cnf,SATISFIABLE,2146,11206,0.05,77280
+cnf/ibm32.mtx.rnd_n32_k25/ibm32.mtx.rnd_n32_k25_w5.cnf,SATISFIABLE,2018,10796,0.05,77056
+cnf/ibm32.mtx.rnd_n32_k25/ibm32.mtx.rnd_n32_k25_w6.cnf,SATISFIABLE,2114,11090,0.05,76832
+cnf/ibm32.mtx.rnd_n32_k25/ibm32.mtx.rnd_n32_k25_w7.cnf,SATISFIABLE,1985,10648,0.05,76384
+cnf/ibm32.mtx.rnd_n32_k25/ibm32.mtx.rnd_n32_k25_w8.cnf,UNSATISFIABLE,2049,10544,0.94,108356

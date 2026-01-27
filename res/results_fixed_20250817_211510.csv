@@ -1,0 +1,6 @@
+File,Result,Variables,Clauses,Time(seconds),Memory(kB)
+cnf/ibm32.mtx.rnd_n32_k24/ibm32.mtx.rnd_n32_k24_w2.cnf,N/A,2378,11177,10.01,124256
+cnf/ibm32.mtx.rnd_n32_k24/ibm32.mtx.rnd_n32_k24_w3.cnf,N/A,2378,12281,10.01,118752
+cnf/ibm32.mtx.rnd_n32_k24/ibm32.mtx.rnd_n32_k24_w4.cnf,N/A,2314,12525,12.82,112628
+cnf/ibm32.mtx.rnd_n32_k24/ibm32.mtx.rnd_n32_k24_w5.cnf,N/A,2314,12737,10.01,107552
+cnf/bcspwr01.mtx.rnd_n39_k29/bcspwr01.mtx.rnd_n39_k29_w2.cnf,N/A,3421,12503,10.01,126268
