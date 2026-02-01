@@ -15,7 +15,7 @@ from typing import Optional, Dict, Any
 #  ./painless/build/release/painless_release cnf/K_n117_k80/K_n117_k80_w38.cnf   -c=4   -solver=cckk -no-model
 
 # Global config
-name = "PSE_test"
+name = "PSE"
 LOG_FILE = "logs/PSE/log_" + name + ".txt" # Where to save log file
 EXCEL_FILE = "output/PSE/output_" + name + ".xlsx" # Where to save Excel file (output file)
 

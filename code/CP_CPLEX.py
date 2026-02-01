@@ -4,19 +4,20 @@ import time
 import logging
 import pandas as pd
 from typing import Optional
-import gurobipy as gp
-from gurobipy import GRB
+from docplex.cp.model import CpoModel
+
 
 # ================= CONFIG =================
-name = "Gurobi"
-LOG_FILE = f"logs/Gurobi/log_{name}.txt"
-EXCEL_FILE = f"output/Gurobi/output_{name}.xlsx"
+name = "CP_CPLEX"
+LOG_FILE = f"logs/CP_CPLEX/log_{name}.txt"
+EXCEL_FILE = f"output/CP_CPLEX/output_{name}.xlsx"
 
 TIME_LIMIT_DEFAULT = 1800
 # ==========================================
 
+
 # ================= LOGGING =================
-def setup_logger(name="gurobi", log_file=LOG_FILE):
+def setup_logger(name="cp", log_file=LOG_FILE):
     logger = logging.getLogger(name)
     if getattr(logger, "_configured", False):
         return logger
@@ -51,82 +52,49 @@ def read_input(file_path):
 # ==========================================
 
 
-# ================= GUROBI SOLVER ===========
-def solve_gurobi(graph, k, lb, ub, timeout_sec):
+# ================= CP SOLVER ===============
+def solve_cp(graph, k, lb, ub, timeout_sec):
     n = len(graph)
-    M = k*2  # Big-M
-
-    model = gp.Model("Gurobi")
-    model.Params.TimeLimit = timeout_sec
+    mdl = CpoModel(name="CP_CPLEX")
 
     # -------- variables --------
-    label = model.addVars(
-        range(1, n + 1),
-        vtype=GRB.INTEGER,
-        lb=1,
-        ub=k,
-        name="label"
-    )
+    label = {
+        i: mdl.integer_var(1, k, name=f"label_{i}")
+        for i in range(1, n + 1)
+    }
 
-    width = model.addVar(
-        vtype=GRB.INTEGER,
-        lb=lb,
-        ub=ub,
-        name="width"
-    )
-
-    # y[i,l] = 1 if node i uses label l
-    y = model.addVars(
-        range(1, n + 1),
-        range(1, k + 1),
-        vtype=GRB.BINARY,
-        name="y"
-    )
-
-    # -------- link label & y --------
-    for i in range(1, n + 1):
-        model.addConstr(
-            gp.quicksum(l * y[i, l] for l in range(1, k + 1)) == label[i]
-        )
-        model.addConstr(
-            gp.quicksum(y[i, l] for l in range(1, k + 1)) == 1
-        )
+    width = mdl.integer_var(lb, ub, name="width")
 
     # -------- no-hole --------
     for l in range(1, k + 1):
-        model.addConstr(
-            gp.quicksum(y[i, l] for i in range(1, n + 1)) >= 1
-        )
+        mdl.add(mdl.count(label.values(), l) >= 1)
 
     # -------- anti-k-labeling --------
-    added = set()
-
     for u in graph:
         for v in graph[u]:
-            if (v, u) in added:
-                continue
-            added.add((u, v))
+            mdl.add(mdl.abs(label[u] - label[v]) >= width)
 
-            b = model.addVar(vtype=GRB.BINARY)
-            model.addConstr(label[u] - label[v] >= width - M * (1 - b))
-            model.addConstr(label[v] - label[u] >= width - M * b)
-
-    # # -------- symmetry breaking --------
-    deg = {i: 0 for i in range(1, n + 1)}
+    # -------- symmetry breaking --------
+    cnt = {i: 0 for i in range(1, n + 1)}
     for u in graph:
         for v in graph[u]:
-            deg[u] += 1
-            deg[v] += 1
-    node = min(deg, key=lambda x: deg[x])
-    model.addConstr(label[node] <= k // 2)
+            cnt[u] += 1
+            cnt[v] += 1
+
+    node = min(cnt, key=lambda x: cnt[x])
+    mdl.add(label[node] <= k // 2)
 
     # -------- objective --------
-    model.setObjective(width, GRB.MAXIMIZE)
+    mdl.maximize(width)
 
-    model.optimize()
+    # -------- solve --------
+    sol = mdl.solve(
+        TimeLimit=timeout_sec,
+        LogVerbosity="Quiet"
+    )
 
-    if model.SolCount > 0:
-        return True, int(width.X)
+    if sol:
+        return True, sol[width]
     return False, None
 # ==========================================
 
@@ -150,7 +118,7 @@ def solve_for_ans(graph, k, lb, ub, filename, time_limit):
     logger = setup_logger()
 
     t0 = time.time()
-    ok, best_width = solve_gurobi(graph, k, lb, ub, time_limit)
+    ok, best_width = solve_cp(graph, k, lb, ub, time_limit)
     elapsed = round(time.time() - t0, 2)
 
     res.append([
@@ -169,7 +137,9 @@ def solve_for_ans(graph, k, lb, ub, filename, time_limit):
         mode='write' if len(res) == 2 else 'append'
     )
 
-    return best_width if ok else -9999
+    if ok:
+        return best_width
+    return -9999
 # ==========================================
 
 
@@ -177,6 +147,7 @@ def solve_for_ans(graph, k, lb, ub, filename, time_limit):
 def solve():
     logger = setup_logger()
 
+    # clear files
     open(LOG_FILE, "w").close()
     if os.path.exists(EXCEL_FILE):
         os.remove(EXCEL_FILE)
@@ -185,20 +156,26 @@ def solve():
     files = glob.glob(f"{folder_path}/*")
 
     for file_path in files:
-        print("solving ", file_path)
         t0 = time.time()
 
         graph, k, lb, ub = read_input(file_path)
         fname = os.path.basename(file_path)
 
         ans = solve_for_ans(
-            graph, k, lb, ub, fname, TIME_LIMIT_DEFAULT
+            graph,
+            k,
+            lb,
+            ub,
+            fname,
+            TIME_LIMIT_DEFAULT
         )
 
         logger.info("$$$$")
         logger.info(f"{fname} → best width = {ans}")
         logger.info("$$$$")
-        logger.info(f"Time total: {round(time.time() - t0, 2)}s")
+        logger.info(
+            f"Time total: {round(time.time() - t0, 2)}s"
+        )
 
 
 if __name__ == "__main__":
