@@ -5,11 +5,10 @@ import logging
 import pandas as pd
 from docplex.mp.model import Model
 
-
 # ================= CONFIG =================
-name = "DE_MIP_BINARY_4cores"
-LOG_FILE = f"logs/DE/log_{name}.txt"
-EXCEL_FILE = f"output/DE/output_{name}.xlsx"
+name = "MIP_CPLEX"
+LOG_FILE = f"logs/MIP_CPLEX/log_{name}.txt"
+EXCEL_FILE = f"output/MIP_CPLEX/output_{name}.xlsx"
 
 TIME_LIMIT_DEFAULT = 1800
 # ==========================================
@@ -51,38 +50,55 @@ def read_input(file_path):
 # ==========================================
 
 
-# ================= MIP SOLVER ==============
+# ================= CPLEX MIP SOLVER =================
 def solve_mip(graph, k, lb, ub, timeout_sec):
     n = len(graph)
-    mdl = Model(name="AntiKLabeling_MIP_Binary")
+    M = 2 * k
+
+    mdl = Model(name="MIP_CPLEX")
 
     # -------- variables --------
-    x = {
-        (i, l): mdl.binary_var(name=f"x_{i}_{l}")
+    label = {
+        i: mdl.integer_var(lb=1, ub=k, name=f"label_{i}")
+        for i in range(1, n + 1)
+    }
+
+    width = mdl.integer_var(lb=lb, ub=ub, name="width")
+
+    # y[i,l] = 1 if node i uses label l
+    y = {
+        (i, l): mdl.binary_var(name=f"y_{i}_{l}")
         for i in range(1, n + 1)
         for l in range(1, k + 1)
     }
 
-    width = mdl.integer_var(lb, ub, name="width")
-
-    # -------- exactly-one --------
+    # -------- link label & y --------
     for i in range(1, n + 1):
-        mdl.add(mdl.sum(x[i, l] for l in range(1, k + 1)) == 1)
+        mdl.add(
+            mdl.sum(l * y[i, l] for l in range(1, k + 1)) == label[i]
+        )
+        mdl.add(
+            mdl.sum(y[i, l] for l in range(1, k + 1)) == 1
+        )
 
     # -------- no-hole --------
     for l in range(1, k + 1):
-        mdl.add(mdl.sum(x[i, l] for i in range(1, n + 1)) >= 1)
+        mdl.add(
+            mdl.sum(y[i, l] for i in range(1, n + 1)) >= 1
+        )
 
     # -------- anti-k-labeling --------
+    added = set()
+
     for u in graph:
         for v in graph[u]:
-            for l1 in range(1, k + 1):
-                for l2 in range(1, k + 1):
-                    if abs(l1 - l2) < ub:
-                        mdl.add(
-                            x[u, l1] + x[v, l2]
-                            <= 1 + (abs(l1 - l2) >= width)
-                        )
+            if (v, u) in added:
+                continue
+            added.add((u, v))
+
+            b = mdl.binary_var(name=f"b_{u}_{v}")
+            mdl.add(label[u] - label[v] >= width - M * (1 - b))
+            mdl.add(label[v] - label[u] >= width - M * b)
 
     # -------- symmetry breaking --------
     deg = {i: 0 for i in range(1, n + 1)}
@@ -92,24 +108,21 @@ def solve_mip(graph, k, lb, ub, timeout_sec):
             deg[v] += 1
 
     node = min(deg, key=lambda x: deg[x])
-    for l in range(k // 2 + 1, k + 1):
-        mdl.add(x[node, l] == 0)
+    mdl.add(label[node] <= k // 2)
 
     # -------- objective --------
     mdl.maximize(width)
 
-    # -------- CPLEX params --------
+    # -------- time limit --------
     mdl.context.cplex_parameters.timelimit = timeout_sec
-    mdl.context.cplex_parameters.threads = 4
 
     # -------- solve --------
-    sol = mdl.solve(log_output=False)
+    sol = mdl.solve(log_output=True)
 
     if sol:
         return True, int(sol[width])
     return False, None
-# ==========================================
-
+# ====================================================
 
 # ================= PIPELINE ================
 res = [["filename", "n", "k", "lb", "ub",
@@ -167,6 +180,7 @@ def solve():
     files = glob.glob(f"{folder_path}/*")
 
     for file_path in files:
+        print("Solving file:", file_path)
         t0 = time.time()
 
         graph, k, lb, ub = read_input(file_path)

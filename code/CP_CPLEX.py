@@ -8,12 +8,11 @@ from docplex.cp.model import CpoModel
 
 
 # ================= CONFIG =================
-name = "DE_CP_4cores"
-LOG_FILE = f"logs/DE/log_{name}.txt"
-EXCEL_FILE = f"output/DE/output_{name}.xlsx"
+name = "CP_CPLEX"
+LOG_FILE = f"logs/CP_CPLEX/log_{name}.txt"
+EXCEL_FILE = f"output/CP_CPLEX/output_{name}.xlsx"
 
 TIME_LIMIT_DEFAULT = 1800
-MAX_WORKERS = 4
 # ==========================================
 
 
@@ -56,7 +55,7 @@ def read_input(file_path):
 # ================= CP SOLVER ===============
 def solve_cp(graph, k, lb, ub, timeout_sec):
     n = len(graph)
-    mdl = CpoModel(name="AntiKLabeling_MaxWidth")
+    mdl = CpoModel(name="CP_CPLEX")
 
     # -------- variables --------
     label = {
@@ -91,7 +90,6 @@ def solve_cp(graph, k, lb, ub, timeout_sec):
     # -------- solve --------
     sol = mdl.solve(
         TimeLimit=timeout_sec,
-        Workers=MAX_WORKERS,
         LogVerbosity="Quiet"
     )
 
